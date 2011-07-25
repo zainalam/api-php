@@ -8,7 +8,7 @@ class Ordrin {
     private
         $_api_data;
 
-    var
+    static 
         $_errors;
 
     function __construct($key, $url) {
@@ -36,12 +36,15 @@ class Ordrin {
 }
 
 /* Money Class */
-class Money  extends Ordrin {
+class Money extends Ordrin {
     private $amount = 0;
 
     function __construct($amt) {
+        echo "DEBUG: in constructor\n";
         if (!is_numeric($amt)) {
-            $this->_errors[] = "Money - Validation - must be a number, we got ($amt)";
+            echo "DEBUG: not numeric\n";
+//            $this->_errors[] = "Money - Validation - must be a number, we got ($amt)";
+            parent::$_errors[]= "Money - Validation - must be a number, we got ($amt)";
         } else {
             $this->amount = $amt;
         }
