@@ -1,8 +1,10 @@
 <?php
 class User extends Ordrin {
-    private
-        $_email;
 
+    function __construct() {
+        // Placeholder
+    }
+    
     function makeAcct($email, $password, $fName, $lName) {
         $this->_request(array(
                              'type' => 'POST',

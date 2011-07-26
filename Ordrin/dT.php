@@ -41,4 +41,8 @@ class dT extends Ordrin {
 
         return $this->_date['mon'] . "-" . $this->_date['mday'] . "+" . $this->_date['hours'] . ':' . $this->_date['minutes'];
     }
+
+    function _asap() {
+        return $this->_asap;
+    }
 }
