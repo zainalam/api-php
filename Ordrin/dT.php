@@ -4,7 +4,6 @@
 
 class dT extends Ordrin {
     private
-        $_asap = false,
         $_date;
 
     function __construct() {
@@ -19,15 +18,19 @@ class dT extends Ordrin {
         switch ($element) {
             case 'month':
                 if ($this->_date['mon'] < 10) return "0" . $this->_date['mon'];
+                else return $this->_date['mon'];
                 break;
             case 'day':
                 if ($this->_date['mday'] < 10) return "0" . $this->_date['mday'];
+                else return $this->_date['mday'];
                 break;
             case 'hour':
                 if ($this->_date['hours'] < 10) return "0" . $this->_date['hours'];
+                else return $this->_date['hours'];
                 break;
             case 'minute':
                 if ($this->_date['minutes'] < 10) return "0" . $this->_date['minutes'];
+                else return $this->_date['minutes'];
                 break;
             default:
                 return 0;
@@ -43,6 +46,7 @@ class dT extends Ordrin {
     }
 
     function _asap() {
+//        echo "DEBUG :: Returning asap as: " . $this->_asap;
         return $this->_asap;
     }
 }

@@ -11,7 +11,7 @@ function __autoload($name) {
 
 class Ordrin {
     private
-        $_staticVars = array('email','password'),
+        $_staticVars = array('_email','_password', '_key', '_url'),
         $_api_data;
 
     protected
@@ -20,21 +20,22 @@ class Ordrin {
     static
         $_email,
         $_password,
+        $_url,
+        $_key,
         $_errors;
 
     function __construct($key, $url) {
-        $this->__set('_url', $url);
-        $this->__set('_key', $key);
+        $this->_url = $url;
+        $this->_key = $key;
     }
 
     function setCurrAcct($email, $pass) {
-//        if (!preg_match($this->_email_re, $email)) {
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             // Not Found
             self::$_errors[] = "Ordrin.php setCurrAcct - validation - email invalid ($email)";
         } else {
-            $this->__set('email', $email);
-            $this->__set('password', $pass);
+            $this->_email = $email;
+            $this->_password = $pass;
         }
     }
 
@@ -42,15 +43,19 @@ class Ordrin {
     /** -- Magic Functions -- **/
     function __set($name, $value) {
 
-        echo "DEBUG: setting $name as $value\n";
         if (in_array($name, $this->_staticVars)) {
-            echo 'Debug :: Static Var ' . $name . "\n";
             switch ($name) {
-                case 'email':
+                case '_email':
                     self::$_email = $value;
                     break;
-                case 'password':
+                case '_password':
                     self::$_password = $value;
+                    break;
+                case '_url':
+                    self::$_url = $value;
+                    break;
+                case '_key':
+                    self::$_key = $value;
                     break;
             }
         } else
@@ -58,15 +63,19 @@ class Ordrin {
     }
 
     function __get($name) {
-        echo "DEBUG: getting $name\n";
         if (in_array($name, $this->_staticVars)) {
-            echo 'Debug :: Static Var ' . $name . "\n";
             switch ($name) {
-                case 'email':
+                case '_email':
                     return self::$_email;
                     break;
-                case 'password':
+                case '_password':
                     return self::$_password;
+                    break;
+                case '_url':
+                    return self::$_url;
+                    break;
+                case '_key':
+                    return self::$_key;
                     break;
             }
         } else
@@ -80,7 +89,93 @@ class Ordrin {
         echo "---------------------------------------------\n";
         echo print_r($data,true);
         echo "---------------------------------------------\n";
-        echo "DEBUG :: Request ended.. \n";
+
+        if (!$this->_key) self::$_errors[] = 'initialization - must initialize with developer key for api';
+        elseif (!$this->_url) self::$_errors[] = 'initialization - must initialize with site at which API is running';
+
+        //Grab Method and Type
+        $type = $data['type'];
+        $method = $data['method'];
+        $headers = array();
+
+        $url_params = '/' . $method . '/' . join('/', $data['url_params']);
+
+        $headers[] = 'X-NAAMA-CLIENT-AUTHENTICATION: id="' . $this->_key . '", version="1"';
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+
+        $_data = '';
+        foreach ($data['data_params'] as $key => $val) {
+            if (!empty($_data)) $_data .= '&';
+            $_data .= $key . '=' . $val;
+        }
+
+        echo "URL Append: " . $url_params . "\n";
+        echo "DATA: $_data\n";
+        
+        echo "DO: " . $this->_url . $url_params . "\n";
+
+        if ($method == 'u') {
+            if (!self::$_email || !self::$_password) {
+                self::$_errors[] = 'user API - valid email and password required to access user API';
+            }
+
+            // Add header for authentication
+            $headers[] = 'X-NAAMA-AUTHENTICATION: username="' . $this->_email . '", response="' . hash('sha256', $this->_password) . '", version="1"';
+        }
+
+        if ($method == 'uN') $method = 'u';
+
+        echo "\n\n";
+        if (!empty(self::$_errors)) {
+            throw new Exception('Errors encountered: ' . implode('\n', self::$_errors));
+        }
+
+        echo 'Headers: ' . print_r($headers,true);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_URL, $this->_url . $url_params);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, $headers);
+
+        if ($type == 'GET') {
+            $respBody = curl_exec($ch);
+            $respInfo = curl_getinfo($ch);
+        }
+
+        if ($type == 'PUT') {
+            $reqLen = strlen($_data);
+            $fh = fopen('php://memory', 'rw');
+            fwrite($fh, $_data);
+            rewind($fh);
+
+            curl_setopt($ch, CURLOPT_INFILE, $fh);
+            curl_setopt($ch, CURLOPT_INFILESIZE, $reqLen);
+            curl_setopt($ch, CURLOPT_PUT, true);
+
+            $respBody = curl_exec($ch);
+            $respInfo = curl_getinfo($ch);
+        }
+
+        if ($type == "POST") {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
+            curl_setopt($ch, CURLOPT_POST, 1);
+
+            $respBody = curl_exec($ch);
+            $respInfo = curl_getinfo($ch);
+        }
+
+        if ($type == "DELETE") {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+
+            $respBody = curl_exec($ch);
+            $respInfo = curl_getinfo($ch);
+
+        }
+
+        echo "\nRespBody : " . print_r($respBody, true);
+        echo "\nRespInfo : " . print_r($respInfo,true);
+        curl_close($ch);
     }
 
     /* Private Functions */

@@ -13,16 +13,18 @@ class Restaurant extends Ordrin {
         $this->_request(array(
                              'type' => 'GET',
                              'method' => 'dl',
-                             $dt->_convertForAPI(),
-                             $addr->__get('zip'),
-                             $addr->__get('city'),
-                             $addr->__get('street')
+                             'url_params' => array(
+                                 $dt->_convertForAPI(),
+                                 $addr->zip,
+                                 $addr->city,
+                                 $addr->street
+
+                             ),
+                             'data_params' => array()
                         ));
     }
 
     function deliveryCheck($rID, $dT, $addr) {
-        //TODO: Check nums here
-        // - some psudeo code
         if (!is_numeric($rID)) {
             parent::$_errors[] = "Restaurant DeliveryCheck - Validation - restaurant ID (invalid, must be numeric) we got ($rID)";
         }
@@ -31,15 +33,17 @@ class Restaurant extends Ordrin {
         $this->_request(array(
                              'type' => 'GET',
                              'method' => 'dc',
-                             'id' => $rID,
-                             'dt', $dT->_convertForAPI(),
-                             'address' => $addr
+                             'url_params' => array(
+                                 $rID, $dT->_convertForAPI(),
+                                 $addr->zip,
+                                 $addr->city,
+                                 $addr->street
+                             ),
+                            'data_params' => array()
                         ));
     }
 
     function deliveryFee($rID, $subtotal, $tip, $dT, $addr) {
-        //TODO: Valdation
-        // - some psudeo code
         if (!is_numeric($rID)) {
             parent::$_errors[] = "Restaurant DeliveryCheck - Validation - restaurant ID (invalid, must be numeric) we got ($rID)";
         }
@@ -48,18 +52,20 @@ class Restaurant extends Ordrin {
         $this->_request(array(
                              'type' => 'GET',
                              'method' => 'fee',
-                             'id' => $rID,
-                             'subtotal' => $subtotal->_convertForAPI(),
-                             'tip' => $tip->_convertForAPI(),
-                             'dt' => $dT->_convertForAPI(),
-                             'address' => $addr /* Push in the whole object so it's easier */
+                            'url_params' => array(
+                                $rID,
+                                $subtotal->_convertForAPI(),
+                                $tip->_convertForAPI(),
+                                $dT->_convertForAPI(),
+                                $addr->zip,
+                                $addr->city,
+                                $addr->street
+                            ),
+                            'data_params' => array()
                         ));
     }
 
     function details($rID) {
-        //TODO: Validation
-        // - some psudeo code
-
         if (!is_numeric($rID)) {
             parent::$_errors[] = "Restaurant DeliveryCheck - Validation - restaurant ID (invalid, must be numeric) we got ($rID)";
         }
@@ -67,7 +73,8 @@ class Restaurant extends Ordrin {
         $this->_request(array(
                              'type' => 'GET',
                              'method' => 'rd',
-                             'id' => $rID
+                             'url_params' => array($rID),
+                             'data_params' => array()
                         ));
     }
 }

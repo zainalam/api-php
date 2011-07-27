@@ -9,10 +9,14 @@ class User extends Ordrin {
         $this->_request(array(
                              'type' => 'POST',
                              'method' => 'uN',
-                             'email' => $email,
-                             'password' => $password,
-                             'first_name' => $fName,
-                             'last_name' => $lName
+                             'url_params' => array(
+                                 $email,
+                             ),
+                             'data_params' => array(
+                                 'password' => $password,
+                                 'first_name' => $fName,
+                                 'last_name' => $lName
+                             ),
                         ));
     }
 
@@ -20,26 +24,34 @@ class User extends Ordrin {
         $this->_request(array(
                              'type' => 'GET',
                              'method' => 'u',
-                             'email' => $this->__get('email')
+                             'url_params' => array(
+                                 $this->_email
+                             ),
+                             'data_params' => array(),
                         ));
     }
 
     function getAddress($addrNick = '') {
-        //TODO: What is addrs ?
         if (!empty($addrNick)) {
             $this->_request(array(
                                  'type' => 'GET',
                                  'method' => 'u',
-                                 'email' => $this->__get('email'),
-                                 'addrs' => '',
-                                 'nick' => $addrNick
+                                 'url_params' => array(
+                                     $this->_email,
+                                     'addrs',
+                                     $addrNick,
+                                 ),
+                                 'data_params' => array(),
                             ));
         } else {
             $this->_request(array(
                                  'type' => 'GET',
                                  'method' => 'u',
-                                 'email' => $this->__get('email'),
-                                 'addrs' => ''
+                                 'url_params' => array(
+                                     $this->_email,
+                                     'addrs',
+                                 ),
+                                 'data_params' => array(),
                             ));
 
         }
@@ -51,19 +63,32 @@ class User extends Ordrin {
         $this->_request(array(
                              'type' => 'PUT',
                              'method' => 'u',
-                             'email' => $this->__get('email'),
-                             'addrs' => '',
-                             'address' => $addr
+                             'url_params' => array(
+                                 $this->_email,
+                                 'addrs',
+                                 $addr->nick
+                             ),
+                             'data_params' => array(
+                                 'addr' => $addr->street,
+                                 'addr2' => $addr->street2,
+                                 'city' => $addr->city,
+                                 'state' => $addr->state,
+                                 'zip' => $addr->zip,
+                                 'phone' => $addr->phone,
+                             )
                         ));
     }
 
     function deleteAddress($addrNick) {
         $this->_request(array(
-                            'type' => 'DELETE',
-                            'method' => 'u',
-                            'email' => $this->__get('email'),
-                            'addrs' => '',
-                            'nick' => $addrNick
+                             'type' => 'DELETE',
+                             'method' => 'u',
+                             'url_params' => array(
+                                 'email',
+                                 'addrs',
+                                 $addrNick
+                             ),
+                             'data_params' => array()
                         ));
     }
 
@@ -72,15 +97,22 @@ class User extends Ordrin {
             $this->_request(array(
                                  'type' => 'GET',
                                  'method' => 'u',
-                                 'email' => $this->__get('email'),
-                                 "ccs" => $cardNick
+                                 'url_params' => array(
+                                     $this->_email,
+                                     "ccs",
+                                     $cardNick
+                                 ),
+                                 'data_params' => array()
                             ));
         } else {
             $this->_request(array(
                                  'type' => 'GET',
                                  'method' => 'u',
-                                 'email' => $this->__get('email'),
-                                 "ccs" => ''
+                                 'url_params' => array(
+                                     $this->_email,
+                                     "ccs",
+                                 ),
+                                 'data_params' => array()
                             ));
         }
     }
@@ -91,14 +123,23 @@ class User extends Ordrin {
         $this->_request(array(
                              'type' => 'PUT',
                              'method' => 'u',
-                             'email' => $this->__get('email'),
-                             'ccs' => $cardNick,
-                             'name' => $name,
-                             'number' => $number,
-                             'cvc' => $cvv,
-                             'expiry_month' => $expiryMonth,
-                             'expiry_year' => $expiryYear,
-                             'bill_addr' => $addr /* Will be broken out in the request */
+                             'url_params' => array(
+                                 $this->_email,
+                                 'ccs',
+                                 $cardNick,
+                             ),
+                             'data_params' => array(
+                                 'name' => $name,
+                                 'number' => $number,
+                                 'cvc' => $cvv,
+                                 'expiry_month' => $expiryMonth,
+                                 'expiry_year' => $expiryYear,
+                                 'bill_addr' => $addr->street,
+                                 'bill_addr2' => $addr->street2,
+                                 'bill_city' => $addr->city,
+                                 'bill_state' => $addr->state,
+                                 'bill_zip' => $addr->zip,
+                             ),
                         ));
     }
 
@@ -106,8 +147,12 @@ class User extends Ordrin {
         $this->_request(array(
                             'type' => 'DELETE',
                             'method' => 'u',
-                            'email' => $this->__get('email'),
-                            'ccs' => $cardNick
+                            'url_params' => array(
+                                $this->_email,
+                                'ccs',
+                                $cardNick
+                            ),
+                            'data_params' => array(),
                         ));
     }
 
@@ -115,14 +160,21 @@ class User extends Ordrin {
         if (!empty($orderID)) $this->_request(array(
                                                    'type' => 'GET',
                                                    'method' => 'u',
-                                                   'email' => $this->__get('email'),
-                                                   'order' => $orderID
+                                                   'url_params' => array(
+                                                       $this->_email,
+                                                       'order',
+                                                       $orderID
+                                                   ),
+                                                   'data_params' => array()
                                               ));
         else $this->_request(array(
                                   'type' => 'GET',
                                   'method' => 'u',
-                                  'email' => $this->__get('email'),
-                                  'orders' => true
+                                  'url_params' => array(
+                                      $this->_email,
+                                      'orders' => true
+                                  ),
+                                  'data_params' => array()
                              ));
     }
 
@@ -130,8 +182,13 @@ class User extends Ordrin {
         $this->_request(array(
                              'type' => 'PUT',
                              'method' => 'u',
-                             'email' => $this->__get('email'),
-                             'password' => hash('sha256', $password)
+                             'url_params' => array(
+                                 $this->_email,
+                                 'password'
+                             ),
+                             'data_params' => array(
+                                 'password' => hash('sha256', $password)
+                             )
                         ));
     }
 }
