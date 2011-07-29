@@ -27,7 +27,7 @@ Usage
     $r->deliveryFee("142", $subT, $tip, $dt, $a);
     $r->details("142");
 
-    $api->_url = 'https://u-test.ordr.in'; // Test User API
+    $api->_url = 'http://localhost'; // Test User API
     $u = new User();
     $u->makeAcct('test@test.com', 'pass', 'John','Doe');
     $api->setCurrAcct('test@test.com', 'pass');
@@ -45,7 +45,7 @@ Usage
 
     $u->updatePassword('newPassword');
 
-    $api->_url = 'https://o-test.ordr.in'; // Test Order API
+    $api->_url = 'http://localhost'; // Test Order API
 
     $o = new Order();
     $tray = '';
