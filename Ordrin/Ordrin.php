@@ -98,32 +98,45 @@ class Ordrin {
         $method = $data['method'];
         $headers = array();
 
-        $url_params = '/' . $method . '/' . join('/', $data['url_params']);
+        echo 'DEBUG :: ' . $type . "\n";
+        
 
         $headers[] = 'X-NAAMA-CLIENT-AUTHENTICATION: id="' . $this->_key . '", version="1"';
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
 
         $_data = '';
-        foreach ($data['data_params'] as $key => $val) {
-            if (!empty($_data)) $_data .= '&';
-            $_data .= $key . '=' . $val;
-        }
-
-        echo "URL Append: " . $url_params . "\n";
-        echo "DATA: $_data\n";
+        $postData = array();
         
-        echo "DO: " . $this->_url . $url_params . "\n";
+//        foreach ($data['data_params'] as $key => $val) {
+//
+//            if (!empty($_data)) $_data .= '&';
+//            $_data .= $key . '=' . $val;
+//            if ($type == "POST") {
+//                $postData[$key] = $val;
+//            }
+//        }
+        $_data = http_build_query($data['data_params'], '', '&');
+        $headers[] = 'Content-length: ' . strlen($_data);
 
-        if ($method == 'u') {
+        $origMethod = $method;
+        if ($method == 'uN') $method = 'u';
+        $url_params = '/' . $method . '/' . join('/', $data['url_params']);
+
+        if ($origMethod == 'u') {
             if (!self::$_email || !self::$_password) {
                 self::$_errors[] = 'user API - valid email and password required to access user API';
             }
 
             // Add header for authentication
-            $headers[] = 'X-NAAMA-AUTHENTICATION: username="' . $this->_email . '", response="' . hash('sha256', $this->_password) . '", version="1"';
+            $headers[] = 'X-NAAMA-AUTHENTICATION: username="' . $this->_email . '", response="' . hash('sha256', $this->_password . $this->_email . $url_params) . '", version="1"';
         }
 
-        if ($method == 'uN') $method = 'u';
+        unset($origMethod);
+        
+        echo "URL Append: " . $url_params . "\n";
+        echo "DATA: $_data\n";
+
+        echo "DO: " . $this->_url . $url_params . "\n";
 
         echo "\n\n";
         if (!empty(self::$_errors)) {
@@ -136,7 +149,12 @@ class Ordrin {
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_URL, $this->_url . $url_params);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+
+        // For Debug
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+
 
         if ($type == 'GET') {
             $respBody = curl_exec($ch);
@@ -158,6 +176,7 @@ class Ordrin {
         }
 
         if ($type == "POST") {
+            $_data = http_build_query($postData, '', '&');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
             curl_setopt($ch, CURLOPT_POST, 1);
 
@@ -173,11 +192,15 @@ class Ordrin {
 
         }
 
-        echo "\nRespBody : " . print_r($respBody, true);
+        echo "\nRespBody : " . print_r(json_decode($respBody), true);
         echo "\nRespInfo : " . print_r($respInfo,true);
         curl_close($ch);
     }
 
+
+    function _headerFunc($ch, $header) {
+        echo "HEADER: " . $header;
+    }
     /* Private Functions */
 }
 
