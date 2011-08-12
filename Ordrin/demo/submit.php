@@ -16,7 +16,7 @@ pif ($_POST["dT"] == 'ASAP') {
 $dt = new dT("");
 $dt->asap();
   
-$api = new Ordrin('sLclVFC54BGXcjGku8bTaA', 'https://r-test.ordr.in');
+$api = new Ordrin('mlJhC8iX4BGWVtn', 'https://r-test.ordr.in');
 
 switch ($_GET["api"]) {
   case "r":
